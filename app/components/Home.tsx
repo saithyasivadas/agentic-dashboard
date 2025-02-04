@@ -22,7 +22,7 @@ export default function Home() {
       return;
     }
     setError('');
-    router.push(`dashboard/?postName=${walletAddress}`);
+    router.push(`/?walletAddress=${walletAddress}`);
   };
 
   return (
