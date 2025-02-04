@@ -99,11 +99,11 @@ export default function Dashboard() {
           <Image
             src={publisherInfo.logo}
             alt={publisherInfo.name}
-            width={64} // Set width explicitly
-            height={64} // Set height explicitly
+            width={64}
+            height={64}
             className="w-16 h-16 rounded-full mr-4"
-            priority // Improves loading performance
-            unoptimized // Remove this if your image comes from a Next.js-optimized source
+            priority
+            unoptimized
           />
 
           <div>
@@ -122,11 +122,25 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
+
       <main className="container mx-auto px-4 py-8">
         <h2 className="text-xl font-semibold mb-6 text-white">Ads Dashboard</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {AdInfo.map((ad, index) => {
             const score = ad.reputationScore || ad.repuationScore || "N/A";
+
+            // ⭐ Calculate Average Star Rating & Total Votes
+            const totalVotes = ad.userScores.reduce(
+              (acc, score) => acc + score.count,
+              0
+            );
+            const totalStars = ad.userScores.reduce(
+              (acc, score) => acc + score.stars * score.count,
+              0
+            );
+            const avgRating =
+              totalVotes > 0 ? (totalStars / totalVotes).toFixed(1) : "N/A";
+
             return (
               <div
                 key={index}
@@ -135,17 +149,18 @@ export default function Dashboard() {
                 <Image
                   src={ad.adImage}
                   alt={ad.adTitle}
-                  width={500} // Set an appropriate width
-                  height={192} // Set height (equivalent to h-48 in Tailwind)
+                  width={500}
+                  height={192}
                   className="w-full h-48 object-cover"
-                  priority // Ensures it's loaded quickly
-                  unoptimized // Use this if images are from an API or external source
+                  priority
+                  unoptimized
                 />
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-white mb-2">
                     {ad.adTitle}
                   </h3>
                   <p className="text-gray-300 mb-4">{ad.adDescription}</p>
+
                   <div className="mb-4">
                     <span className="text-sm text-gray-400">
                       Ad Reputation Score:
@@ -158,12 +173,23 @@ export default function Dashboard() {
                       Ad Bid Amount: ${ad.moneySpent}
                     </span>
                   </div>
+
+                  {/* ⭐ Star Rating & Total Votes */}
+                  <div className="flex items-center space-x-2 mt-4">
+                    <span className="text-yellow-400 text-lg">
+                      ⭐ {avgRating}
+                    </span>
+                    <span className="text-gray-400 text-sm">
+                      ({totalVotes} votes)
+                    </span>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
       </main>
+
       <footer className="bg-gray-800 border-t border-gray-700 mt-8">
         <div className="container mx-auto px-4 py-4 text-center text-gray-400">
           © {new Date().getFullYear()} Publisher Dashboard. All rights reserved.
