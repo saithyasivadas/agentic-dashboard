@@ -56,7 +56,6 @@ export default function Dashboard() {
 
     const fetchDashboardData = async () => {
       try {
-        // Instead of using the external API URL, we now call our internal API route.
         const endpoint = `/api/dashboard?walletAddress=${walletAddress}`;
         const res = await fetch(endpoint, { method: 'GET' });
 
@@ -70,8 +69,12 @@ export default function Dashboard() {
         }
 
         setDashboardData(data.data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred.");
+        }
       }
     };
 
