@@ -36,9 +36,9 @@ export async function GET(request: Request) {
     }
     const data = await res.json();
     return NextResponse.json(data);
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { success: false, error: error.message },
+      { success: false, error: error instanceof Error ? error.message : " Routing Error " },
       { status: 500 }
     );
   }
