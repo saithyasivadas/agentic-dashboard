@@ -4,6 +4,7 @@ interface PublisherInfo {
   name: string;
   walletAddress: string;
   logo: string;
+  reputationScore: number; // Add reputationScore to the interface
 }
 
 interface OperatorDetails {
@@ -86,6 +87,13 @@ export default async function DashboardPage() {
           <div>
             <h1 className="text-2xl font-bold text-white">{publisherInfo.name}</h1>
             <p className="text-gray-400 text-sm">{publisherInfo.walletAddress}</p>
+            {/* Display Reputation Score */}
+            <p className="text-gray-400 text-sm">
+              Reputation Score:{" "}
+              <span className="text-green-500 font-medium">
+                {publisherInfo.reputationScore}
+              </span>
+            </p>
           </div>
         </div>
       </header>
@@ -110,17 +118,17 @@ export default async function DashboardPage() {
                 <div className="p-4">
                   <h3 className="text-lg font-bold text-white mb-2">{ad.adTitle}</h3>
                   <p className="text-gray-300 mb-4">{ad.adDescription}</p>
-                 <div className="mb-4">
-  {/* Reputation Score Label and Badge */}
-  <span className="text-sm text-gray-400">Ad Reputation Score:</span>
-  <span className="bg-green-500 text-white text-sm font-medium px-2 py-1 rounded-full ml-2">
-    {score}
-  </span>
-  {/* Line Break */}
-  <br />
-  {/* Money Spent Info */}
-  <span className="text-sm text-gray-400">Ad Bid Amount: ${ad.moneySpent}</span>
-</div>
+                  <div className="mb-4">
+                    {/* Reputation Score Label and Badge */}
+                    <span className="text-sm text-gray-400">Ad Reputation Score:</span>
+                    <span className="bg-green-500 text-white text-sm font-medium px-2 py-1 rounded-full ml-2">
+                      {score}
+                    </span>
+                    {/* Line Break */}
+                    <br />
+                    {/* Money Spent Info */}
+                    <span className="text-sm text-gray-400">Ad Bid Amount: ${ad.moneySpent}</span>
+                  </div>
                   {/* Operator Details */}
                   <div className="flex items-center">
                     <img
