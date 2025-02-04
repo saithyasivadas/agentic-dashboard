@@ -1,44 +1,51 @@
 // File: app/api/dashboard/route.ts
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-export async function GET(request: Request) {
-  // Extract the walletAddress query parameter from the request URL.
-  const { searchParams } = new URL(request.url);
-  const walletAddress = searchParams.get('walletAddress');
-
-  if (!walletAddress) {
-    return NextResponse.json(
-      { success: false, error: 'Missing walletAddress parameter' },
-      { status: 400 }
-    );
-  }
-
-  // Use the API base URL from your environment variables.
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-  if (!apiBaseUrl) {
-    return NextResponse.json(
-      { success: false, error: 'API_URL is not defined in environment variables.' },
-      { status: 500 }
-    );
-  }
-
-  // Construct the external API endpoint URL.
-  const endpoint = `${apiBaseUrl}/api/publisher/dashboard?walletAddress=${walletAddress}`;
-
+export async function GET(request: Request): Promise<NextResponse> {
   try {
-    // Make the server-to-server call (CORS does not apply here).
-    const res = await fetch(endpoint, { method: 'GET' });
-    if (!res.ok) {
+    // Extract query parameters from the request URL
+    const { searchParams } = new URL(request.url);
+    const walletAddress = searchParams.get("walletAddress");
+
+    if (!walletAddress) {
       return NextResponse.json(
-        { success: false, error: `External API error: ${res.statusText}` },
-        { status: res.status }
+        { success: false, error: "Missing 'walletAddress' parameter" },
+        { status: 400 }
       );
     }
-    const data = await res.json();
-    return NextResponse.json(data);
+
+    // Validate environment variable
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+    if (!apiBaseUrl) {
+      console.error("Error: NEXT_PUBLIC_API_URL is not defined in environment variables.");
+      return NextResponse.json(
+        { success: false, error: "Server misconfiguration: API URL is missing" },
+        { status: 500 }
+      );
+    }
+
+    // Construct API endpoint
+    const endpoint = `${apiBaseUrl}/api/publisher/dashboard?walletAddress=${walletAddress}`;
+
+    // Make the server-to-server request
+    const response = await fetch(endpoint, { method: "GET" });
+
+    if (!response.ok) {
+      console.error(`External API error: ${response.status} - ${response.statusText}`);
+      return NextResponse.json(
+        { success: false, error: `External API error: ${response.statusText}` },
+        { status: response.status }
+      );
+    }
+
+    // Parse and return the response data
+    const data = await response.json();
+    return NextResponse.json({ success: true, data });
   } catch (error: unknown) {
+    console.error("Unexpected error in /api/dashboard:", error);
+
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : " Routing Error " },
+      { success: false, error: error instanceof Error ? error.message : "An unknown error occurred" },
       { status: 500 }
     );
   }

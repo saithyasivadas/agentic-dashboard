@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from "react";
+import Image from "next/image";
 
 interface PublisherInfo {
   name: string;
@@ -45,19 +45,20 @@ interface DashboardResponse {
 }
 
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [error, setError] = useState('');
-
-  const searchParams = useSearchParams();
-  const walletAddress = searchParams.get('postName');
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(
+    null
+  );
+  const [error, setError] = useState("");
 
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const walletAddress = urlParams.get("postName");
     if (!walletAddress) return;
 
     const fetchDashboardData = async () => {
       try {
         const endpoint = `/api/dashboard?walletAddress=${walletAddress}`;
-        const res = await fetch(endpoint, { method: 'GET' });
+        const res = await fetch(endpoint, { method: "GET" });
 
         if (!res.ok) {
           throw new Error(`Failed to fetch dashboard data: ${res.statusText}`);
@@ -65,7 +66,7 @@ export default function Dashboard() {
 
         const data: DashboardResponse = await res.json();
         if (!data.success) {
-          throw new Error('Error: Unable to retrieve dashboard data.');
+          throw new Error("Error: Unable to retrieve dashboard data.");
         }
 
         setDashboardData(data.data);
@@ -79,7 +80,7 @@ export default function Dashboard() {
     };
 
     fetchDashboardData();
-  }, [walletAddress]);
+  }, []);
 
   if (error) {
     return <div className="text-red-500 text-center py-10">{error}</div>;
@@ -95,17 +96,28 @@ export default function Dashboard() {
     <div className="min-h-screen bg-black text-white">
       <header className="bg-gray-800 shadow relative">
         <div className="container mx-auto px-4 py-6 flex items-center">
-          <img
+          <Image
             src={publisherInfo.logo}
             alt={publisherInfo.name}
+            width={64} // Set width explicitly
+            height={64} // Set height explicitly
             className="w-16 h-16 rounded-full mr-4"
+            priority // Improves loading performance
+            unoptimized // Remove this if your image comes from a Next.js-optimized source
           />
+
           <div>
-            <h1 className="text-2xl font-bold text-white">{publisherInfo.name}</h1>
-            <p className="text-gray-400 text-sm">{publisherInfo.walletAddress}</p>
+            <h1 className="text-2xl font-bold text-white">
+              {publisherInfo.name}
+            </h1>
             <p className="text-gray-400 text-sm">
-              Reputation Score:{' '}
-              <span className="text-green-500 font-medium">{publisherInfo.reputationScore}</span>
+              {publisherInfo.walletAddress}
+            </p>
+            <p className="text-gray-400 text-sm">
+              Reputation Score:{" "}
+              <span className="text-green-500 font-medium">
+                {publisherInfo.reputationScore}
+              </span>
             </p>
           </div>
         </div>
@@ -114,18 +126,30 @@ export default function Dashboard() {
         <h2 className="text-xl font-semibold mb-6 text-white">Ads Dashboard</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {AdInfo.map((ad, index) => {
-            const score = ad.reputationScore || ad.repuationScore || 'N/A';
+            const score = ad.reputationScore || ad.repuationScore || "N/A";
             return (
               <div
                 key={index}
                 className="bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 overflow-hidden"
               >
-                <img src={ad.adImage} alt={ad.adTitle} className="w-full h-48 object-cover" />
+                <Image
+                  src={ad.adImage}
+                  alt={ad.adTitle}
+                  width={500} // Set an appropriate width
+                  height={192} // Set height (equivalent to h-48 in Tailwind)
+                  className="w-full h-48 object-cover"
+                  priority // Ensures it's loaded quickly
+                  unoptimized // Use this if images are from an API or external source
+                />
                 <div className="p-4">
-                  <h3 className="text-lg font-bold text-white mb-2">{ad.adTitle}</h3>
+                  <h3 className="text-lg font-bold text-white mb-2">
+                    {ad.adTitle}
+                  </h3>
                   <p className="text-gray-300 mb-4">{ad.adDescription}</p>
                   <div className="mb-4">
-                    <span className="text-sm text-gray-400">Ad Reputation Score:</span>
+                    <span className="text-sm text-gray-400">
+                      Ad Reputation Score:
+                    </span>
                     <span className="bg-green-500 text-white text-sm font-medium px-2 py-1 rounded-full ml-2">
                       {score}
                     </span>
