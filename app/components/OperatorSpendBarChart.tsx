@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -31,11 +32,24 @@ interface AdInfoItem {
   userScores: Array<{ stars: number; count: number }>;
 }
 
-interface OperatorSpendBarChartProps {
-  adInfo: AdInfoItem[];
-}
+// 🎯 Component to fetch query params and render the chart
+export default function SpendBarChartContent() {
+  const searchParams = useSearchParams();
+  const encodedData = searchParams.get("data");
 
-export default function OperatorSpendBarChart({ adInfo }: OperatorSpendBarChartProps) {
+  // Use state to safely store parsed adInfo
+  const [adInfo, setAdInfo] = useState<AdInfoItem[]>([]);
+
+  useEffect(() => {
+    if (encodedData) {
+      try {
+        setAdInfo(JSON.parse(decodeURIComponent(encodedData)));
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+      }
+    }
+  }, [encodedData]);
+
   // Aggregate money spent by operator
   const operatorSpend: Record<string, number> = {};
 
@@ -104,7 +118,10 @@ export default function OperatorSpendBarChart({ adInfo }: OperatorSpendBarChartP
   };
 
   return (
-    <div className="flex justify-center">
+    <div className="min-h-screen bg-black text-white p-6 flex flex-col items-center">
+      <h1 className="text-2xl font-bold mb-6">Charts</h1>
+
+      {/* Responsive Chart Container */}
       <div className="w-full max-w-4xl p-4 bg-gray-900 rounded-lg shadow-md">
         <div className="relative h-72 sm:h-96">
           <Bar data={data} options={options} />

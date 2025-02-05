@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 import { useSearchParams } from "next/navigation";
 import OperatorSpendBarChart from "../components/OperatorSpendBarChart";
@@ -16,5 +16,19 @@ export default function SpendBarChart() {
       <h1 className="text-2xl font-bold mb-6">Charts</h1>
       <OperatorSpendBarChart adInfo={adInfo} />
     </div>
+  );
+}
+*/
+
+"use client";
+
+import { Suspense } from "react";
+import OperatorSpendBarChart from "../components/OperatorSpendBarChart";
+
+export default function SpendBarChart() {
+  return (
+    <Suspense fallback={<div className="text-white text-center p-6">Loading...</div>}>
+      <OperatorSpendBarChart/>
+    </Suspense>
   );
 }
