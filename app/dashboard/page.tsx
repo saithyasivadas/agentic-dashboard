@@ -2,58 +2,26 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-
-interface PublisherInfo {
-  name: string;
-  walletAddress: string;
-  logo: string;
-  reputationScore: number;
-}
-
-interface OperatorDetails {
-  name: string;
-  location: string;
-  walletAddress: string;
-  timing: string;
-  operatorLogo: string;
-}
-
-interface UserScore {
-  stars: number;
-  count: number;
-}
-
-interface AdInfoItem {
-  adTitle: string;
-  adDescription: string;
-  adImage: string;
-  reputationScore?: string;
-  repuationScore?: string;
-  operatorDetails: OperatorDetails;
-  moneySpent: string;
-  userScores: UserScore[];
-}
-
-interface DashboardData {
-  publisherInfo: PublisherInfo;
-  AdInfo: AdInfoItem[];
-}
-
-interface DashboardResponse {
-  success: boolean;
-  data: DashboardData;
-}
+import DashboardBody from "../components/DashboardBody";
+import { DashboardData, DashboardResponse } from "./type";
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(
     null
   );
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1); // Pagination state
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const walletAddress = urlParams.get("postName");
-    if (!walletAddress) return;
+    if (!walletAddress) {
+      setError("Wallet address is missing in the URL.");
+      setIsLoading(false); // Stop loading if there's an error
+      return;
+    }
 
     const fetchDashboardData = async () => {
       try {
@@ -76,6 +44,8 @@ export default function Dashboard() {
         } else {
           setError("An unknown error occurred.");
         }
+      } finally {
+        setIsLoading(false); // Stop loading after fetching data
       }
     };
 
@@ -84,6 +54,13 @@ export default function Dashboard() {
 
   if (error) {
     return <div className="text-red-500 text-center py-10">{error}</div>;
+  }
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+      </div>
+    );
   }
 
   if (!dashboardData) {
@@ -123,72 +100,27 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
-        <h2 className="text-xl font-semibold mb-6 text-white">Ads Dashboard</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {AdInfo.map((ad, index) => {
-            const score = ad.reputationScore || ad.repuationScore || "N/A";
+      {/* Body Component */}
+      <DashboardBody AdInfo={AdInfo} />
 
-            // ⭐ Calculate Average Star Rating & Total Votes
-            const totalVotes = ad.userScores.reduce(
-              (acc, score) => acc + score.count,
-              0
-            );
-            const totalStars = ad.userScores.reduce(
-              (acc, score) => acc + score.stars * score.count,
-              0
-            );
-            const avgRating =
-              totalVotes > 0 ? (totalStars / totalVotes).toFixed(1) : "N/A";
-
-            return (
-              <div
-                key={index}
-                className="bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 overflow-hidden"
-              >
-                <Image
-                  src={ad.adImage}
-                  alt={ad.adTitle}
-                  width={500}
-                  height={192}
-                  className="w-full h-48 object-cover"
-                  priority
-                  unoptimized
-                />
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    {ad.adTitle}
-                  </h3>
-                  <p className="text-gray-300 mb-4">{ad.adDescription}</p>
-
-                  <div className="mb-4">
-                    <span className="text-sm text-gray-400">
-                      Ad Reputation Score:
-                    </span>
-                    <span className="bg-green-500 text-white text-sm font-medium px-2 py-1 rounded-full ml-2">
-                      {score}
-                    </span>
-                    <br />
-                    <span className="text-sm text-gray-400">
-                      Ad Bid Amount: ${ad.moneySpent}
-                    </span>
-                  </div>
-
-                  {/* ⭐ Star Rating & Total Votes */}
-                  <div className="flex items-center space-x-2 mt-4">
-                    <span className="text-yellow-400 text-lg">
-                      ⭐ {avgRating}
-                    </span>
-                    <span className="text-gray-400 text-sm">
-                      ({totalVotes} votes)
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </main>
+      {/* Pagination Controls */}
+      <div className="flex justify-center mt-8 pb-8">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-400"
+        >
+          Previous
+        </button>
+        <span className="mx-4 text-white">Page {currentPage}</span>
+        <button
+          onClick={() => setCurrentPage((prev) => prev + 1)}
+          disabled={currentPage * itemsPerPage >= AdInfo.length}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-400"
+        >
+          Next
+        </button>
+      </div>
 
       <footer className="bg-gray-800 border-t border-gray-700 mt-8">
         <div className="container mx-auto px-4 py-4 text-center text-gray-400">
