@@ -11,8 +11,8 @@ export default function Dashboard() {
   );
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  //const [currentPage, setCurrentPage] = useState(1);
+ // const itemsPerPage = 5;
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -68,7 +68,7 @@ export default function Dashboard() {
   }
 
   const { publisherInfo, AdInfo } = dashboardData;
-  const totalPages = Math.ceil(AdInfo.length / itemsPerPage);
+ // const totalPages = Math.ceil(AdInfo.length / itemsPerPage);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -104,7 +104,7 @@ export default function Dashboard() {
       {/* Body Component */}
       <DashboardBody AdInfo={AdInfo} />
 
-      {/* Pagination Controls - only show if more than one page */}
+      {/* Pagination Controls - only show if more than one page 
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row justify-center items-center mt-8 pb-8 space-y-4 sm:space-y-0 sm:space-x-4">
           <button
@@ -154,6 +154,7 @@ export default function Dashboard() {
           </button>
         </div>
       )}
+      */}
 
       <footer className="bg-gray-800 border-t border-gray-700 mt-8">
         <div className="container mx-auto max-w-screen-xl px-4 py-4 text-center text-gray-400">
