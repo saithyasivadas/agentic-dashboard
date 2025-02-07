@@ -1,59 +1,54 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-// Define the TypeScript interface for AdInfoItem
+// Define TypeScript interface
 interface AdInfoItem {
   _id: string;
   adTitle: string;
-  adDescription: string;
-  adImage: string;
   moneySpent: number;
 }
 
 export default function AdSpendChart() {
-  const [data, setData] = useState<AdInfoItem[]>([]);
+  const searchParams = useSearchParams();
+  const encodedData = searchParams.get("data");
+
+  const [adData, setAdData] = useState<AdInfoItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    if (encodedData) {
       try {
-        const response = await fetch("/api/ads"); // API Endpoint
-        const result = await response.json();
-        if (result.success && Array.isArray(result.data.AdInfo)) {
-          setData(
-            result.data.AdInfo.map((ad: AdInfoItem) => ({
-              _id: ad._id,
-              adTitle: ad.adTitle,
-              adDescription: ad.adDescription,
-              adImage: ad.adImage,
-              moneySpent: ad.moneySpent,
-            }))
-          );
+        const decodedString = decodeURIComponent(encodedData);
+        const parsedData: AdInfoItem[] = JSON.parse(decodedString);
+
+        // Ensure the data has the expected structure
+        if (Array.isArray(parsedData) && parsedData.every(item => item.adTitle && typeof item.moneySpent === "number")) {
+          setAdData(parsedData);
+        } else {
+          console.error("Invalid data format received.");
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error parsing JSON:", error);
       }
-    };
-
-    fetchData();
-  }, []);
+    }
+    setLoading(false);
+  }, [encodedData]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4 bg-gray-900 rounded-lg shadow-md">
+    <div className="w-full max-w-4xl mx-auto p-4 bg-gray-900 rounded-lg shadow-md mt-8">
       <h2 className="text-white text-lg sm:text-xl font-semibold text-center mb-4">
         Ad Spending Over Different Ads
       </h2>
 
       {loading ? (
         <p className="text-white text-center">Loading...</p>
-      ) : (
+      ) : adData.length > 0 ? (
         <div className="w-full h-72 sm:h-96">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 10, right: 30, left: 10, bottom: 80 }}>
+            <LineChart data={adData} margin={{ top: 10, right: 30, left: 10, bottom: 80 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#444" />
               <XAxis
                 dataKey="adTitle"
@@ -70,6 +65,8 @@ export default function AdSpendChart() {
             </LineChart>
           </ResponsiveContainer>
         </div>
+      ) : (
+        <p className="text-white text-center">No data available.</p>
       )}
     </div>
   );
