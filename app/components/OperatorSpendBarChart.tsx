@@ -19,43 +19,49 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 // Define TypeScript types
 interface AdInfoItem {
   adTitle: string;
-  operatorDetails: { name: string };
+  adDescription: string;
+  adImage: string;
+  operatorDetails: {
+    name: string;
+    location: string;
+    walletAddress: string;
+    timing: string;
+    operatorLogo: string;
+  };
   moneySpent: string;
+  userScores: Array<{ stars: number; count: number }>;
 }
 
 // 🎯 Component to fetch query params and render the chart
-export default function OpSpendChart() {
+export default function SpendBarChartContent() {
   const searchParams = useSearchParams();
   const encodedData = searchParams.get("data");
 
+  // Use state to safely store parsed adInfo
   const [adInfo, setAdInfo] = useState<AdInfoItem[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (encodedData) {
       try {
-        const decodedString = decodeURIComponent(encodedData);
-        const parsedData: AdInfoItem[] = JSON.parse(decodedString);
-
-        if (Array.isArray(parsedData) && parsedData.every(item => item.adTitle && item.operatorDetails?.name && typeof item.moneySpent === "string")) {
-          setAdInfo(parsedData);
-        } else {
-          console.error("Invalid data format received.");
-        }
+        setAdInfo(JSON.parse(decodeURIComponent(encodedData)));
       } catch (error) {
         console.error("Error parsing JSON:", error);
       }
     }
-    setLoading(false);
   }, [encodedData]);
 
   // Aggregate money spent by operator
   const operatorSpend: Record<string, number> = {};
+
   adInfo.forEach((ad) => {
     const operatorName = ad.operatorDetails.name;
     const moneySpent = parseFloat(ad.moneySpent); // Convert string to number
 
-    operatorSpend[operatorName] = (operatorSpend[operatorName] || 0) + moneySpent;
+    if (operatorSpend[operatorName]) {
+      operatorSpend[operatorName] += moneySpent;
+    } else {
+      operatorSpend[operatorName] = moneySpent;
+    }
   });
 
   // Extract labels (operator names) and aggregated spending
@@ -79,7 +85,7 @@ export default function OpSpendChart() {
   // Chart options (responsive settings)
   const options = {
     responsive: true,
-    maintainAspectRatio: false,
+    maintainAspectRatio: false, // Ensures it adapts well
     plugins: {
       legend: {
         position: "top" as const,
@@ -95,28 +101,31 @@ export default function OpSpendChart() {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { font: { size: 12 } },
+        ticks: {
+          font: {
+            size: 12,
+          },
+        },
       },
       x: {
-        ticks: { font: { size: 12 } },
+        ticks: {
+          font: {
+            size: 12,
+          },
+        },
       },
     },
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6">
-      <h2 className="text-2xl sm:text-3xl font-bold mb-6">Operator Spending on Ads</h2>
+    <div className="min-h-screen bg-black text-white p-6 flex flex-col items-center">
+      <h1 className="text-2xl font-bold mb-6">Charts</h1>
 
-      <div className="w-full max-w-4xl bg-gray-900 p-4 rounded-lg shadow-md">
-        {loading ? (
-          <p className="text-center">Loading...</p>
-        ) : labels.length > 0 ? (
-          <div className="w-full h-64 sm:h-80">
-            <Bar data={data} options={options} />
-          </div>
-        ) : (
-          <p className="text-center">No data available.</p>
-        )}
+      {/* Responsive Chart Container */}
+      <div className="w-full max-w-4xl p-4 bg-gray-900 rounded-lg shadow-md">
+        <div className="relative h-72 sm:h-96">
+          <Bar data={data} options={options} />
+        </div>
       </div>
     </div>
   );
