@@ -24,11 +24,13 @@ export default function SpendBarChart() {
 
 import { Suspense } from "react";
 import OperatorSpendBarChart from "../components/OperatorSpendBarChart";
+import AdSpendChart from "../components/AdSpendChart";
 
 export default function SpendBarChart() {
   return (
     <Suspense fallback={<div className="text-white text-center p-6">Loading...</div>}>
       <OperatorSpendBarChart/>
+      <AdSpendChart/>
     </Suspense>
   );
 }
