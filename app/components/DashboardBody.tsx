@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { AdInfoItem } from "../dashboard/type";
 
@@ -8,11 +9,25 @@ interface DashboardBodyProps {
 }
 
 export default function DashboardBody({ AdInfo }: DashboardBodyProps) {
+  const itemsPerPage = 9;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Calculate total pages
+  const totalPages = Math.ceil(AdInfo.length / itemsPerPage);
+
+  // Paginate data
+  const paginatedAds = AdInfo.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   return (
     <main className="container mx-auto px-4 py-8">
       <h2 className="text-xl sm:text-2xl font-semibold mb-6 text-white">Ads Dashboard</h2>
+
+      {/* Grid of Ads */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {AdInfo.map((ad, index) => {
+        {paginatedAds.map((ad, index) => {
           const score = ad.reputationScore || ad.repuationScore || "N/A";
 
           // ⭐ Calculate Average Star Rating & Total Votes
@@ -58,6 +73,46 @@ export default function DashboardBody({ AdInfo }: DashboardBodyProps) {
           );
         })}
       </div>
+
+      {/* Pagination Buttons */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-8 space-x-4">
+          <button
+            className={`px-4 py-2 rounded-md text-white ${
+              currentPage === 1 ? "bg-gray-500 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+            }`}
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          >
+            Previous
+          </button>
+
+          {/* Page Numbers */}
+          <div className="flex space-x-2">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                className={`px-3 py-2 rounded-md ${
+                  currentPage === i + 1 ? "bg-blue-600 text-white" : "bg-gray-700 text-gray-300 hover:bg-gray-500"
+                }`}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className={`px-4 py-2 rounded-md text-white ${
+              currentPage === totalPages ? "bg-gray-500 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
+            }`}
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </main>
   );
 }
