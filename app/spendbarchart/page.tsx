@@ -1,29 +1,26 @@
 "use client";
 
 import { Suspense } from "react";
-import OperatorSpendBarChart from "../components/OperatorSpendBarChart";
+import { useRouter } from "next/navigation";
+// import OperatorSpendBarChart from "../components/OperatorSpendBarChart";
 import AdSpendChart from "../components/AdSpendChart";
 
 export default function SpendBarChart() {
+  const router = useRouter(); // Initialize Next.js router
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white p-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-center mb-6">Ad & Operator Spend Analytics</h1>
+    <div className="container mx-auto px-4 py-6">
+      {/* Back Button */}
+      <button
+        onClick={() => router.back()} // Navigate back to Dashboard
+        className="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md mb-4"
+      >
+        ← Back to Dashboard
+      </button>
 
+      {/* Chart Component */}
       <Suspense fallback={<div className="text-white text-center p-6">Loading...</div>}>
-        {/* Responsive Grid for Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-6xl">
-          {/* Operator Spend Chart */}
-          <div className="bg-gray-900 p-4 rounded-lg shadow-md w-full">
-            <h2 className="text-lg sm:text-xl font-semibold text-center mb-4">Operator Spend</h2>
-            <OperatorSpendBarChart />
-          </div>
-
-          {/* Ad Spend Chart */}
-          <div className="bg-gray-900 p-4 rounded-lg shadow-md w-full">
-            <h2 className="text-lg sm:text-xl font-semibold text-center mb-4">Ad Spend</h2>
-            <AdSpendChart />
-          </div>
-        </div>
+        <AdSpendChart />
       </Suspense>
     </div>
   );

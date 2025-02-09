@@ -10,9 +10,12 @@ export default function NavigateButton({ adInfo }: NavigateButtonProps) {
   const router = useRouter();
 
   const handleNavigation = () => {
-    // Serialize the adInfo into a query string (convert to JSON and encode)
-    const queryParam = encodeURIComponent(JSON.stringify(adInfo));
-    router.push(`/spendbarchart?data=${queryParam}`);
+    // Save the adInfo array into local storage as a JSON string.
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('adData', JSON.stringify(adInfo));
+    }
+    // Navigate to the Spend Bar Chart page without passing data via URL.
+    router.push('/spendbarchart');
   };
 
   return (

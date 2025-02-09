@@ -119,8 +119,6 @@ export default function SpendBarChartContent() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6 flex flex-col items-center">
-      <h1 className="text-2xl font-bold mb-6">Charts</h1>
-
       {/* Responsive Chart Container */}
       <div className="w-full max-w-4xl p-4 bg-gray-900 rounded-lg shadow-md">
         <div className="relative h-72 sm:h-96">
